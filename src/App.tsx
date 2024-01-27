@@ -6,6 +6,7 @@ import { Route, Routes } from 'react-router-dom'
 import Volunteer from './Components/Volunteer/Volunteer'
 import { UserLoginContextProvider } from './context/userLoginContext'
 import PrivateRoute from './Components/PrivateRoute/PrivateRoute'
+import About from './Components/About/About'
 
 
 
@@ -18,6 +19,7 @@ function App() {
       <Routes>
         <Route path='/' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
+        <Route path='/about' element={<About/>}/>
         <Route path='/volunteer/:id' element={<PrivateRoute><Volunteer/></PrivateRoute>}/>
         <Route path='*' element={<h1 className='text-red-700 text-9xl my-60 text-center'>ERROR 404: NOT FOUND</h1>}/>
       </Routes>
