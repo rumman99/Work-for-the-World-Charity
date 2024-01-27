@@ -2,23 +2,41 @@ import './style.css'
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import firebaseConfig from "./firebase_config";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { UserLoginContext } from '../../context/userLoginContext';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 
 const provider = new GoogleAuthProvider();
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+type User = {
+  name: string;
+  email: string;
+};
 
 const Login = () => {
-const [userLogin, setUserLogin]= useState<object>({});
+const [isLogin, setIsLogin]= useState<User>({ name: '', email: '' });
+const {userLogin, setUserLogin}= useContext(UserLoginContext);
+const navigate = useNavigate();
+const location= useLocation();
+const from = location.state?.from?.pathname || "/"; //Redirect after login //
 
 const handleLoginButton=()=>{
     signInWithPopup(auth, provider)
     .then((result) => {
       // This gives you a Google Access Token. You can use it to access the Google API.
-      const credential = GoogleAuthProvider.credentialFromResult(result);
       const {displayName, email} = result.user;
-      setUserLogin({displayName, email});
+      if(displayName && email){
+        const user:User= {name:displayName, email}
+        setIsLogin(user);
+        setUserLogin(user);
+        navigate(from, { replace: true });
+      }
+      else{
+        console.log("User Info Can't be Null");
+      }
     })
     .catch((error) => {
       // Handle Errors here.
@@ -26,16 +44,16 @@ const handleLoginButton=()=>{
       const errorMessage = error.message;
       // The email of the user's account used.
       const email = error.customData.email;
-      // The AuthCredential type that was used.
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      // ...
+      // console.log(errorCode, errorMessage, email);
     });
 }
 
 
     return (
-        <div className='text-center mt-56'>
-          {!userLogin.email && <h1 className="btn no-animation flex justify-center items-center mt-2 text-2xl font-bold text-red-600 hover:cursor-default">Login First</h1>}<br/>
+      <>
+      {!userLogin.email && <div className='text-center mt-56'>
+           <h1 className="btn no-animation flex justify-center items-center mt-2 text-2xl font-bold text-red-600 hover:cursor-default">Login First
+           </h1><br/>
       {/* Google Login Design*/}
           <button onClick={handleLoginButton} className="gsi-material-button">
           <div className="gsi-material-button-state"></div>
@@ -53,8 +71,9 @@ const handleLoginButton=()=>{
             <span style={{display: 'none'}}>Continue with Google</span>
           </div>
         </button>
-  
         </div>
+      }
+      </>
     );
 };
 
